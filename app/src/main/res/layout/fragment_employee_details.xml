@@ -122,7 +122,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Salary"
+        android:text="@string/emp_salary"
         android:textColor="@color/text_500"
         app:layout_constraintEnd_toStartOf="@+id/vw_divider"
         app:layout_constraintStart_toStartOf="parent"
@@ -155,7 +155,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Joining Date"
+        android:text="@string/emp_joining_date"
         android:textColor="@color/text_500"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/vw_divider"
@@ -179,7 +179,7 @@
             android:layout_marginStart="24dp"
             android:fontFamily="sans-serif-medium"
             android:gravity="center"
-            android:text="Take Photo"
+            android:text="@string/btn_take_photo"
             android:textColor="@color/white"
             android:textSize="14sp" />
 

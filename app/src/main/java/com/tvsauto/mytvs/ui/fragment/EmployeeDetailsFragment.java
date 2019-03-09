@@ -1,6 +1,7 @@
 package com.tvsauto.mytvs.ui.fragment;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -34,8 +35,13 @@ public class EmployeeDetailsFragment extends Fragment {
     private CardView cardTakePic;
     private ImageView ivProPic;
     static final int REQUEST_IMAGE_CAPTURE = 23;
+    private DetailsCallback listener;
 
     public EmployeeDetailsFragment() {
+    }
+
+    public interface DetailsCallback {
+        void detailsClosed();
     }
 
     public static EmployeeDetailsFragment newInstance(String name, String location, String designation,
@@ -114,13 +120,10 @@ public class EmployeeDetailsFragment extends Fragment {
 
         tvLogo.setText(empName.substring(0, 1));
 
-        cardTakePic.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-                }
+        cardTakePic.setOnClickListener(view -> {
+            Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
+                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         });
     }
@@ -147,5 +150,19 @@ public class EmployeeDetailsFragment extends Fragment {
         currentDateTime = sdf1.format(new Date());
         tvTimestamp.setText(currentDateTime);
         tvTimestamp.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof DetailsCallback) {
+            listener = (DetailsCallback) getActivity();
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        listener.detailsClosed();
+        super.onDetach();
     }
 }

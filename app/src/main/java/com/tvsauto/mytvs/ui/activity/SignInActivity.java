@@ -1,6 +1,8 @@
 package com.tvsauto.mytvs.ui.activity;
 
 import android.content.Intent;
+import android.support.constraint.ConstraintLayout;
+import android.support.design.widget.Snackbar;
 import android.support.design.widget.TextInputEditText;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -10,7 +12,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.ArrayMap;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.ProgressBar;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -19,6 +21,7 @@ import com.tvsauto.mytvs.holder.ErrorResponse;
 import com.tvsauto.mytvs.holder.SignInResponse;
 import com.tvsauto.mytvs.network.ApiConfiguration;
 import com.tvsauto.mytvs.network.ApiService;
+import com.tvsauto.mytvs.util.NetworkStateUtil;
 
 import org.json.JSONObject;
 
@@ -35,6 +38,8 @@ public class SignInActivity extends AppCompatActivity {
     private TextInputLayout tilUsername, tilPassword;
     private TextInputEditText etUsername, etPassword;
     private CardView cardSignIn;
+    private ProgressBar pbSignIn;
+    private ConstraintLayout conRoot;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +51,8 @@ public class SignInActivity extends AppCompatActivity {
         etUsername = findViewById(R.id.et_username);
         etPassword = findViewById(R.id.et_password);
         cardSignIn = findViewById(R.id.card_sign_in);
+        pbSignIn = findViewById(R.id.pb_sign_in);
+        conRoot = findViewById(R.id.con_root);
 
         //signIn("test", "123456");
 
@@ -109,11 +116,18 @@ public class SignInActivity extends AppCompatActivity {
         }
 
         if (!etUsername.getText().toString().isEmpty() && !etPassword.getText().toString().isEmpty()) {
-            signIn(etUsername.getText().toString(), etPassword.getText().toString());
+            if (NetworkStateUtil.isOnline(SignInActivity.this)) {
+                signIn(etUsername.getText().toString(), etPassword.getText().toString());
+            } else {
+                showSnackBar("No internet! Please turn your Mobile Data or WiFi");
+            }
         }
     }
 
     private void signIn(String username, String password) {
+
+        cardSignIn.setVisibility(View.INVISIBLE);
+        pbSignIn.setVisibility(View.VISIBLE);
 
         Map<String, Object> jsonParams = new ArrayMap<>();
         jsonParams.put("username", username);
@@ -134,12 +148,15 @@ public class SignInActivity extends AppCompatActivity {
                         finish();
                     }
                 } else if (response.code() == 400) {
+                    cardSignIn.setVisibility(View.VISIBLE);
+                    pbSignIn.setVisibility(View.GONE);
+
                     Gson gson = new GsonBuilder().create();
                     new ErrorResponse();
                     ErrorResponse mError;
                     try {
                         mError = gson.fromJson(response.errorBody().string(), ErrorResponse.class);
-                        Toast.makeText(SignInActivity.this, mError.getErrorDescription(), Toast.LENGTH_LONG).show();
+                        showSnackBar(mError.getErrorDescription());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -148,8 +165,14 @@ public class SignInActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<SignInResponse> call, Throwable t) {
-
+                cardSignIn.setVisibility(View.VISIBLE);
+                pbSignIn.setVisibility(View.GONE);
             }
         });
+    }
+
+    private void showSnackBar(String message) {
+        Snackbar snackbar = Snackbar.make(conRoot, message, Snackbar.LENGTH_LONG);
+        snackbar.show();
     }
 }

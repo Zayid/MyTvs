@@ -3,6 +3,8 @@
     package="com.tvsauto.mytvs">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="true" />
@@ -14,8 +16,19 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
+
         <activity
             android:name=".ui.activity.SplashActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoTitle">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,10 +38,14 @@
         </activity>
         <activity
             android:name=".ui.activity.SignInActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoTitle" />
         <activity
             android:name=".ui.activity.EmployeeListActivity"
-            android:label="Employee List" />
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:label="Employee List"
+            android:screenOrientation="portrait" />
     </application>
 
 </manifest>

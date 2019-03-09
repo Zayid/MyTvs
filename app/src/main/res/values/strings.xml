@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">MyTvs</string>
+    <string name="google_maps_key">AIzaSyCPpRNlzJgQ4WMp7E0M2BwTzPvL58Upyrw</string>
+    <string name="sign_in">Sign In</string>
+    <string name="hint_username">Username *</string>
+    <string name="hint_password">Password *</string>
+    <string name="tvs">TVS</string>
+    <string name="type_map">Map</string>
+    <string name="type_graph">Graph</string>
+    <string name="bottom_sheet_title">Choose Visualisation Method</string>
+    <string name="emp_salary">Salary</string>
+    <string name="emp_joining_date">Joining Date</string>
+    <string name="btn_take_photo">Take Photo</string>/
 </resources>
