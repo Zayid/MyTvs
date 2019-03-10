@@ -10,5 +10,8 @@
     <string name="bottom_sheet_title">Choose Visualisation Method</string>
     <string name="emp_salary">Salary</string>
     <string name="emp_joining_date">Joining Date</string>
-    <string name="btn_take_photo">Take Photo</string>/
+    <string name="btn_take_photo">Take Photo</string>
+    <string name="emp_list_title">Employees in %s</string>
+    <string name="no_result_found">No Result Found</string>
+    <string name="clear_search_filter">Clear search filter</string>
 </resources>

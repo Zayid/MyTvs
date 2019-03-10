@@ -6,23 +6,29 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
+import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.tvsauto.mytvs.R;
 import com.tvsauto.mytvs.holder.Map;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -30,7 +36,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private GoogleMap mapEmployees;
     private MapCallback listener;
-    private List<Map> markerList;
+    private List<Map> markerDataList;
+    private TextView tvTitle, tvEmployees;
+    private CardView cardEmpList;
+    private List<String> appliedMarkerList = new ArrayList<>();
 
     public MapFragment() {
     }
@@ -41,7 +50,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     public static MapFragment newInstance(List<Map> markerList) {
         Bundle bundle = new Bundle();
-        bundle.putSerializable("markerList", (Serializable) markerList);
+        bundle.putSerializable("markerDataList", (Serializable) markerList);
 
         MapFragment fragment = new MapFragment();
         fragment.setArguments(bundle);
@@ -51,7 +60,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
 
     private void readBundle(Bundle bundle) {
         if (bundle != null) {
-            markerList = (List<Map>) bundle.getSerializable("markerList");
+            markerDataList = (List<Map>) bundle.getSerializable("markerDataList");
         }
     }
 
@@ -59,6 +68,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
+
+        cardEmpList = view.findViewById(R.id.card_emp_names);
+        tvEmployees = view.findViewById(R.id.tv_employees);
+        tvTitle = view.findViewById(R.id.tv_title);
 
         SupportMapFragment mapFragment = (SupportMapFragment) this.getChildFragmentManager()
                 .findFragmentById(R.id.map);
@@ -75,12 +88,44 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mapEmployees = googleMap;
+        mapEmployees.getUiSettings().setMapToolbarEnabled(false);
+        mapEmployees.setMapStyle(
+                MapStyleOptions.loadRawResourceStyle(getContext(), R.raw.map_style_2));
 
-        for (int i = 0; i < markerList.size(); i++) {
-            LatLng city = getCityLatitude(markerList.get(i).getCity());
-            mapEmployees.addMarker(new MarkerOptions().position(city).title(markerList.get(i).getName()));
-            mapEmployees.moveCamera(CameraUpdateFactory.newLatLng(city));
+        for (int i = 0; i < markerDataList.size(); i++) {
+            if (!appliedMarkerList.contains(markerDataList.get(i).getCity())) {
+                LatLng city = getCityLatitude(markerDataList.get(i).getCity());
+                if (null != city) {
+                    appliedMarkerList.add(markerDataList.get(i).getCity());
+                    mapEmployees.addMarker(new MarkerOptions().position(city)
+                            .title(markerDataList.get(i).getCity()));
+
+                    if (i == 0) {
+                        mapEmployees.animateCamera(CameraUpdateFactory.newLatLngZoom(city, 12));
+                        setEmployeeList(markerDataList.get(i).getCity());
+                    }
+                }
+            }
         }
+
+        mapEmployees.setOnMarkerClickListener(marker -> {
+            setEmployeeList(marker.getTitle());
+            CameraUpdate center = CameraUpdateFactory.newLatLng(marker.getPosition());
+            mapEmployees.animateCamera(center, 300, null);
+            return true;
+        });
+    }
+
+    private void setEmployeeList(String cityName) {
+        cardEmpList.setVisibility(View.VISIBLE);
+        tvTitle.setText(getResources().getString(R.string.emp_list_title, cityName));
+        StringBuilder empList = new StringBuilder();
+        for (int i = 0; i < markerDataList.size(); i++) {
+            if (markerDataList.get(i).getCity().equals(cityName)) {
+                empList.append(markerDataList.get(i).getName()).append("\n");
+            }
+        }
+        tvEmployees.setText(empList.toString());
     }
 
     public LatLng getCityLatitude(String city) {

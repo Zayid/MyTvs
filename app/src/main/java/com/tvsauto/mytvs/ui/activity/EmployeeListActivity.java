@@ -5,15 +5,18 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 import android.support.v7.widget.Toolbar;
 
+import com.anychart.core.annotations.Line;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.tvsauto.mytvs.R;
@@ -42,6 +45,8 @@ public class EmployeeListActivity extends AppCompatActivity implements EmpListAd
     private SearchView searchView;
     private FloatingActionButton fabFilter;
     private FilterChooserBottomSheet filterChooserBottomSheet;
+    private CardView cardClearSearch;
+    private LinearLayout llNoResultLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +57,18 @@ public class EmployeeListActivity extends AppCompatActivity implements EmpListAd
         setSupportActionBar(toolbar);
         rvEmployees = findViewById(R.id.rv_employees);
         fabFilter = findViewById(R.id.fab_filter);
+        cardClearSearch = findViewById(R.id.card_clear_search);
+        llNoResultLayout = findViewById(R.id.ll_no_result);
 
         strEmpList = getIntent().getStringExtra("empList");
         generateDataSet();
 
         fabFilter.setOnClickListener(view -> showBottomSheet());
+        cardClearSearch.setOnClickListener(view -> {
+            empListAdapter.updateList(empList);
+            cardClearSearch.setVisibility(View.GONE);
+            llNoResultLayout.setVisibility(View.GONE);
+        });
     }
 
     @Override
@@ -69,7 +81,7 @@ public class EmployeeListActivity extends AppCompatActivity implements EmpListAd
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                Toast.makeText(EmployeeListActivity.this, query, Toast.LENGTH_LONG).show();
+                cardClearSearch.setVisibility(View.VISIBLE);
                 filter(query);
                 if (!searchView.isIconified()) {
                     searchView.setIconified(true);
@@ -124,6 +136,10 @@ public class EmployeeListActivity extends AppCompatActivity implements EmpListAd
 
         tempEmp.setData(temp);
         empListAdapter.updateList(tempEmp);
+
+        if (temp.size() == 0) {
+            llNoResultLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     private void showBottomSheet() {
@@ -155,8 +171,9 @@ public class EmployeeListActivity extends AppCompatActivity implements EmpListAd
 
     @Override
     public void displayMap() {
+        fabFilter.hide();
         List<Map> mapList = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < empList.getData().size(); i++) {
             Map graph = new Map(
                     empList.getData().get(i).get(0),
                     empList.getData().get(i).get(2)
@@ -170,7 +187,6 @@ public class EmployeeListActivity extends AppCompatActivity implements EmpListAd
         ft.addToBackStack("mapEmployees");
         ft.commit();
 
-        fabFilter.hide();
     }
 
     @Override
